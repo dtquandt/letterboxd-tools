@@ -1,0 +1,12 @@
+**DONE**
+- Use st.set_page_config() to change tab name and icon
+- Random picker needs to handle empty watchlists
+
+**BUGFIXES**
+- Rec system needs to exclude movies you've already watched
+
+**FEATURES**
+- Add genre filter to rec system
+- Allow model change through api call/command line argument
+- Prettify results display for group watchlist picker
+- Add filters to random picker

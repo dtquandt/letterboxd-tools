@@ -1,0 +1,1 @@
+{"algo": "KernelMF", "film_count": 5000, "sample_size": 57776305, "n_factors": 50, "l2": 0.005, "lr": 0.01, "runtime": 1967, "test_mae": 0.5182148692406721, "test_mse": 0.4706515510849645}

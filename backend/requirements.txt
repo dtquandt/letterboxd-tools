@@ -1,0 +1,5 @@
+pandas
+numpy
+uvicorn
+fastapi
+matrix-factorization
