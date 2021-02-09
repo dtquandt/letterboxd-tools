@@ -32,6 +32,7 @@ def discover_api_base():
     api_base = 'http://localhost:8000'
     try:
         requests.get(api_base+'/')
+        return api_base
     except:
         api_base = 'http://backend:8000'
         requests.get(api_base+'/')
@@ -179,7 +180,7 @@ def recommendation_system():
                 user_ratings = get_user_ratings(username)
                 user_watchlist = fetch_watchlist(username)
                 st.write(
-                    f"Looks like you've rated **{len(user_ratings)} films**, giving an average rating of **{user_ratings['rating'].mean():.2f} stars**.")
+                    f"Looks like you've rated **{len(user_ratings.dropna(subset=['rating'])} films**, giving an average rating of **{user_ratings['rating'].mean():.2f} stars**.")
             except:
                 st.error(
                     "Sorry, we couldn't get the ratings for that user. Try again.")
