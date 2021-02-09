@@ -180,7 +180,7 @@ def recommendation_system():
                 user_ratings = get_user_ratings(username)
                 user_watchlist = fetch_watchlist(username)
                 st.write(
-                    f"Looks like you've rated **{len(user_ratings.dropna(subset=['rating'])} films**, giving an average rating of **{user_ratings['rating'].mean():.2f} stars**.")
+                    f"Looks like you've rated **{len(user_ratings.dropna(subset=['rating']))} films**, giving an average rating of **{user_ratings['rating'].mean():.2f} stars**.")
             except:
                 st.error(
                     "Sorry, we couldn't get the ratings for that user. Try again.")
