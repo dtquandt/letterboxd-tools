@@ -205,6 +205,14 @@ def recommendation_system():
             include_watchlist = row3_col1.checkbox('Include watchlisted films', True)            
             country_specification = row3_col2.text_input('Country filter | 2 letter ISO-3166 code (eg: US, BR, GB)\nLeave blank to include all', '', key='country_txt')
             
+            possible_genres = sorted(['Comedy', 'Drama', 'Thriller', 'Crime', 'Science Fiction',
+                                      'Action', 'Adventure', 'Horror', 'Mystery', 'Animation', 'Music',
+                                      'Romance', 'Fantasy', 'War', 'Western', 'Family', 'History',
+                                      'TV Movie', 'Documentary'])
+            include_genres = st.multiselect('Genres', options=possible_genres, default=possible_genres)
+            
+            
+            
         valid_ratings = user_ratings.dropna(subset=['rating'])
         valid_ratings = valid_ratings[valid_ratings['film'].isin(model_movies)]
         user = user_ratings['member'].iloc[0]
@@ -226,7 +234,7 @@ def recommendation_system():
 
             predictions = pd.DataFrame(predictions)
             predictions = predictions.merge(
-                film_data[['id', 'name', 'rating', 'poster', 'links', 'releaseYear', 'runTime', 'popularity', 'countries']], how='left', left_on='film', right_on='id')
+                film_data[['id', 'name', 'rating', 'poster', 'links', 'releaseYear', 'runTime', 'popularity', 'countries', 'genres']], how='left', left_on='film', right_on='id')
             predictions['difference'] = predictions['prediction'] - predictions['rating']
             predictions['score'] = predictions['prediction'] + predictions['difference']
             predictions = predictions[~predictions['film'].isin(user_ratings['film'])]
@@ -245,8 +253,12 @@ def recommendation_system():
                 predictions = predictions[~predictions['film'].isin(user_watchlist['id'])]
             if rating_range:
                 predictions = predictions[predictions['rating'].between(rating_range[0], rating_range[1])]
-
-            if len(predictions) < 9:
+            if include_genres != possible_genres:
+                predictions['genre_names'] = predictions['genres'].apply(lambda x: [y['name'] for y in x])
+                valid_genres = predictions['genre_names'].apply(lambda x: any(genre in include_genres for genre in x))
+                predictions = predictions[valid_genres]
+                
+            if len(predictions) < 10:
                 st.error('Sorry, your filters did not leave enough films to make recommendations. Try easing up.')
             else:
                 st.header('Here are your picks')
