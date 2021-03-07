@@ -1,10 +1,23 @@
 import streamlit as st
+import streamlit_analytics
 import lbxd
 
 import pandas as pd
 import numpy as np
+import os
 
 import requests
+
+@st.cache(show_spinner=False)
+def get_analytics_password():
+    files = os.listdir()
+    try:
+        analytics_password = [f.replace('.pass', '') for f in files if '.pass' in f][0]
+    except:
+        analytics_password = 'password'
+    return analytics_password
+
+analytics_password = get_analytics_password()
 
 @st.cache(show_spinner=False)
 def load_film_data():
@@ -50,7 +63,9 @@ def random_movie_picker():
 
     st.write("## Can't pick a movie?\nRandomly select one from your watchlist!")
 
-    username = st.text_input('Letterboxd username')
+    with streamlit_analytics.track(unsafe_password=analytics_password, firestore_key_file="firebase-key.json", firestore_collection_name="analytics"):
+        username = st.text_input('Letterboxd username', key='random_picker_username')
+        
     if username:
         with st.spinner('Please wait a moment while we fetch your watchlist...'):
             user_watchlist = fetch_watchlist(username)
@@ -154,8 +169,6 @@ def movie_compatibility_score():
 
 def recommendation_system():
 
-    
-
     @st.cache(show_spinner=False)
     def model_api_get(url):
         return requests.get(API_BASE+url).json()
@@ -171,8 +184,10 @@ def recommendation_system():
         model_movies = model_api_get('/model_items')['items']
 
     user_ratings = None
-    user_watchlist = None            
-    username = st.text_input('Please enter your Letterboxd username')
+    user_watchlist = None
+    
+    with streamlit_analytics.track(unsafe_password=analytics_password, firestore_key_file="firebase-key.json", firestore_collection_name="analytics"):
+        username = st.text_input('Please enter your Letterboxd username')
 
     if username:
         with st.spinner('Please wait while we grab your ratings and watchlist. If you have a lot, it could take a while.'):
@@ -193,23 +208,29 @@ def recommendation_system():
             row1_col1, row1_col2 = st.beta_columns(2)
             row2_col1, row2_col2 = st.beta_columns(2)
             row3_col1, row3_col2 = st.beta_columns(2)
-            year_range = row1_col1.slider('Release year', 1900, 2021, value=(1900, 2021), step=1, format='%i', key='year_sli')
-            runtime_range = row1_col2.slider('Runtime (minutes)', 60, 240, value=(60, 240), step=10, format='%i', key='runtime_sli')
+            with row1_col1:
+                year_range = st.slider('Release year', 1900, 2021, value=(1900, 2021), step=1, format='%i', key='year_sli')
+            with row1_col2:
+                runtime_range = st.slider('Runtime (minutes)', 60, 240, value=(60, 240), step=10, format='%i', key='runtime_sli')
             
-            max_popularity_range = ((len(model_movies) + 99) // 100) * 100
-            popularity_range = row2_col1.slider('Popularity ranking (higher = more obscure)', 0, max_popularity_range, value=(0, max_popularity_range), step=100, format='%i', key='pop_sli')
-            rating_range = row2_col2.slider('Average Letterboxd rating', 0.0, 5.0, value=(0.0,5.0), step=0.5, format='%.1f', key='rat_sli')
+            with row2_col1:
+                max_popularity_range = ((len(model_movies) + 99) // 100) * 100
+                popularity_range = st.slider('Popularity ranking (higher = more obscure)', 0, max_popularity_range, value=(0, max_popularity_range), step=100, format='%i', key='pop_sli')
+            with row2_col2:
+                rating_range = st.slider('Average Letterboxd rating', 0.0, 5.0, value=(0.0,5.0), step=0.5, format='%.1f', key='rat_sli')
             
-            #Spacing
-            row3_col1.title('')
-            include_watchlist = row3_col1.checkbox('Include watchlisted films', True)            
-            country_specification = row3_col2.text_input('Country filter | 2 letter ISO-3166 code (eg: US, BR, GB)\nLeave blank to include all', '', key='country_txt')
+            with row3_col1:
+                #Spacing
+                st.title('')
+                include_watchlist = st.checkbox('Include watchlisted films', True, key='include_watchlist')            
+            with row3_col2:
+                country_specification = st.text_input('Country filter | 2 letter ISO-3166 code (eg: US, BR, GB)\nLeave blank to include all', '', key='country_txt')
             
             possible_genres = sorted(['Comedy', 'Drama', 'Thriller', 'Crime', 'Science Fiction',
                                       'Action', 'Adventure', 'Horror', 'Mystery', 'Animation', 'Music',
                                       'Romance', 'Fantasy', 'War', 'Western', 'Family', 'History',
                                       'TV Movie', 'Documentary'])
-            include_genres = st.multiselect('Genres', options=possible_genres, default=possible_genres)
+            include_genres = st.multiselect('Genres', options=possible_genres, default=possible_genres, key='genre_picker')
             
             
             

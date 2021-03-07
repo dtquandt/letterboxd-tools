@@ -4,3 +4,4 @@ letterboxd
 matrix-factorization
 requests
 streamlit
+streamlit-analytics
