@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 frontend/credentials.txt
 frontend/firebase-key.json
+*.pass
