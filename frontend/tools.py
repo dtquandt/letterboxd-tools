@@ -98,9 +98,9 @@ def random_movie_picker():
                                 st.image(f"{movie_poster_url}", width=300)
                             st.markdown(
                                 f'## {movie_release_year:.0f} | {movie_directors}')
-                            if movie_tagline:
+                            if movie_tagline and isinstance(movie_tagline, str):
                                 st.subheader(movie_tagline)
-                            if movie_description:
+                            if movie_description and isinstance(movie_description, str):
                                 st.write(movie_description)
                             for link in movie_links:
                                 st.write(link)
