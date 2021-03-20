@@ -220,7 +220,7 @@ def recommendation_system():
 
     if user_ratings is not None and len(user_ratings.dropna(subset=['rating'])) > 0:
         
-        year_range, runtime_range, popularity_range, rating_range, include_watchlist, country_specification, include_genres = utils.get_filters()
+        year_range, runtime_range, popularity_range, rating_range, include_watchlist, country_specification, include_genres = utils.get_filters(hide_watchlist_filter=False)
             
         valid_ratings = user_ratings.dropna(subset=['rating'])
         valid_ratings = valid_ratings[valid_ratings['film'].isin(model_movies)]
