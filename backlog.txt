@@ -8,7 +8,9 @@
 
 
 **FEATURES**
-- Allow model change through api call/command line argument
 - Prettify results display for group watchlist picker
 - Add filters to random picker
 - Add list operations tool (common movies between 2+ lists)
+- Use cosine similarity to get similar movies based on ratings
+- Allow higher(50+) number of users for the group watchlist picker
+- Add export feature to recommender
