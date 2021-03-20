@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit_analytics
 import lbxd
+import utils
 
 import pandas as pd
 import numpy as np
@@ -69,28 +70,34 @@ def random_movie_picker():
     if username:
         with st.spinner('Please wait a moment while we fetch your watchlist...'):
             user_watchlist = fetch_watchlist(username)
+            
         if user_watchlist is not None:
             if len(user_watchlist) > 0:
-                user_watchlist = user_watchlist.merge(film_data[['id', 'tagline', 'description']], how='left', on='id')
+                user_watchlist = user_watchlist.merge(film_data[['id', 'rating', 'runTime', 'popularity', 'countries', 'genres', 'tagline', 'description']], how='left', on='id')
                 st.success('Watchlist loaded successfully.')
+                year_range, runtime_range, popularity_range, rating_range, country_specification, include_genres = utils.get_filters()
                 if st.button('Get random movie!'):
-                    sample = user_watchlist.sample(1).iloc[0]                                        
-                    movie_directors = ', '.join(
-                        [x['name'] for x in sample['directors']])
-                    movie_release_year = sample['releaseYear']
-                    movie_title = sample['name']
-                    movie_poster_url = sample['poster']['sizes'][-1]['url'] if len(
-                        sample['poster'].get('sizes')) >= 1 else ''
-                    movie_links = [x['url'] for x in sample['links']]
-                    st.markdown(f'# {movie_title}')
-                    if movie_poster_url:
-                        st.image(f"{movie_poster_url}", width=400)
-                    st.markdown(
-                        f'## {movie_release_year:.0f} | {movie_directors}')
-                    st.subheader(sample['tagline'])
-                    st.write(sample['description'])
-                    for link in movie_links:
-                        st.write(link)
+                    filtered_watchlist = utils.filter_movie_list(user_watchlist, year_range, runtime_range, popularity_range, rating_range, country_specification, include_genres)
+                    if len(filtered_watchlist) < 1:
+                        st.error('Sorry, your filters did not leave enough movies to pick from. Try easing up.')
+                    else:
+                        sample = filtered_watchlist.sample(1).iloc[0]                                        
+                        movie_directors = ', '.join(
+                            [x['name'] for x in sample['directors']])
+                        movie_release_year = sample['releaseYear']
+                        movie_title = sample['name']
+                        movie_poster_url = sample['poster']['sizes'][-1]['url'] if len(
+                            sample['poster'].get('sizes')) >= 1 else ''
+                        movie_links = [x['url'] for x in sample['links']]
+                        st.markdown(f'# {movie_title}')
+                        if movie_poster_url:
+                            st.image(f"{movie_poster_url}", width=400)
+                        st.markdown(
+                            f'## {movie_release_year:.0f} | {movie_directors}')
+                        st.subheader(sample['tagline'])
+                        st.write(sample['description'])
+                        for link in movie_links:
+                            st.write(link)
             else:
                 st.error(
                     'Sorry, but it looks like this user has no watchlist or it is set to private!')
@@ -204,35 +211,7 @@ def recommendation_system():
 
     if user_ratings is not None and len(user_ratings.dropna(subset=['rating'])) > 0:
         
-        with st.beta_expander('Advanced filters'):
-            row1_col1, row1_col2 = st.beta_columns(2)
-            row2_col1, row2_col2 = st.beta_columns(2)
-            row3_col1, row3_col2 = st.beta_columns(2)
-            with row1_col1:
-                year_range = st.slider('Release year', 1900, 2021, value=(1900, 2021), step=1, format='%i', key='year_sli')
-            with row1_col2:
-                runtime_range = st.slider('Runtime (minutes)', 60, 240, value=(60, 240), step=10, format='%i', key='runtime_sli')
-            
-            with row2_col1:
-                max_popularity_range = ((len(model_movies) + 99) // 100) * 100
-                popularity_range = st.slider('Popularity ranking (higher = more obscure)', 0, max_popularity_range, value=(0, max_popularity_range), step=100, format='%i', key='pop_sli')
-            with row2_col2:
-                rating_range = st.slider('Average Letterboxd rating', 0.0, 5.0, value=(0.0,5.0), step=0.5, format='%.1f', key='rat_sli')
-            
-            with row3_col1:
-                #Spacing
-                st.title('')
-                include_watchlist = st.checkbox('Include watchlisted films', True, key='include_watchlist')            
-            with row3_col2:
-                country_specification = st.text_input('Country filter | 2 letter ISO-3166 code (eg: US, BR, GB)\nLeave blank to include all', '', key='country_txt')
-            
-            possible_genres = sorted(['Comedy', 'Drama', 'Thriller', 'Crime', 'Science Fiction',
-                                      'Action', 'Adventure', 'Horror', 'Mystery', 'Animation', 'Music',
-                                      'Romance', 'Fantasy', 'War', 'Western', 'Family', 'History',
-                                      'TV Movie', 'Documentary'])
-            include_genres = st.multiselect('Genres', options=possible_genres, default=possible_genres, key='genre_picker')
-            
-            
+        year_range, runtime_range, popularity_range, rating_range, include_watchlist, country_specification, include_genres = utils.get_filters()
             
         valid_ratings = user_ratings.dropna(subset=['rating'])
         valid_ratings = valid_ratings[valid_ratings['film'].isin(model_movies)]
@@ -261,24 +240,11 @@ def recommendation_system():
             predictions = predictions[~predictions['film'].isin(user_ratings['film'])]
 
             predictions = predictions.sort_values(by='score', ascending=False)
-            if year_range:
-                predictions = predictions[predictions['releaseYear'].between(year_range[0], year_range[1])]
-            if runtime_range:
-                predictions = predictions[predictions['runTime'].between(runtime_range[0], runtime_range[1])]
-            if popularity_range:
-                predictions = predictions[predictions['popularity'].between(popularity_range[0], popularity_range[1])]
-            if country_specification:
-                country_filter = predictions['countries'].apply(lambda x: country_specification in [c.get('code') for c in x] if type(x) == list else False)
-                predictions = predictions[country_filter]
             if user_watchlist is not None and len(user_watchlist) > 0 and include_watchlist == False:
                 predictions = predictions[~predictions['film'].isin(user_watchlist['id'])]
-            if rating_range:
-                predictions = predictions[predictions['rating'].between(rating_range[0], rating_range[1])]
-            if include_genres != possible_genres:
-                predictions['genre_names'] = predictions['genres'].apply(lambda x: [y['name'] for y in x])
-                valid_genres = predictions['genre_names'].apply(lambda x: any(genre in include_genres for genre in x))
-                predictions = predictions[valid_genres]
                 
+            predictions = utils.filter_movie_list(predictions, year_range, runtime_range, popularity_range, rating_range, country_specification, include_genres)
+            
             if len(predictions) < 10:
                 st.error('Sorry, your filters did not leave enough films to make recommendations. Try easing up.')
             else:
