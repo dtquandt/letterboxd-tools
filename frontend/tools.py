@@ -76,28 +76,37 @@ def random_movie_picker():
                 user_watchlist = user_watchlist.merge(film_data[['id', 'rating', 'runTime', 'popularity', 'countries', 'genres', 'tagline', 'description']], how='left', on='id')
                 st.success('Watchlist loaded successfully.')
                 year_range, runtime_range, popularity_range, rating_range, country_specification, include_genres = utils.get_filters()
+                movies_to_sample = st.slider('How many films do you want to pick?', 1, 10, 1, key='random_picker_sample_count')
                 if st.button('Get random movie!'):
                     filtered_watchlist = utils.filter_movie_list(user_watchlist, year_range, runtime_range, popularity_range, rating_range, country_specification, include_genres)
-                    if len(filtered_watchlist) < 1:
+                    if len(filtered_watchlist) < movies_to_sample:
                         st.error('Sorry, your filters did not leave enough movies to pick from. Try easing up.')
                     else:
-                        sample = filtered_watchlist.sample(1).iloc[0]                                        
-                        movie_directors = ', '.join(
-                            [x['name'] for x in sample['directors']])
-                        movie_release_year = sample['releaseYear']
-                        movie_title = sample['name']
-                        movie_poster_url = sample['poster']['sizes'][-1]['url'] if len(
-                            sample['poster'].get('sizes')) >= 1 else ''
-                        movie_links = [x['url'] for x in sample['links']]
-                        st.markdown(f'# {movie_title}')
-                        if movie_poster_url:
-                            st.image(f"{movie_poster_url}", width=400)
-                        st.markdown(
-                            f'## {movie_release_year:.0f} | {movie_directors}')
-                        st.subheader(sample['tagline'])
-                        st.write(sample['description'])
-                        for link in movie_links:
-                            st.write(link)
+                        full_sample = filtered_watchlist.sample(movies_to_sample).reset_index()
+                        for idx, sample in full_sample.iterrows():
+                            movie_directors = ', '.join(
+                                [x['name'] for x in sample['directors']])
+                            movie_release_year = sample['releaseYear']
+                            movie_title = sample['name']
+                            movie_tagline = sample['tagline']
+                            movie_description = sample['description']
+                            movie_poster_url = sample['poster']['sizes'][-1]['url'] if len(
+                                sample['poster'].get('sizes')) >= 1 else ''
+                            movie_links = [x['url'] for x in sample['links']]
+                            st.markdown(f'# {movie_title}')
+                            if movie_poster_url:
+                                st.image(f"{movie_poster_url}", width=300)
+                            st.markdown(
+                                f'## {movie_release_year:.0f} | {movie_directors}')
+                            if movie_tagline:
+                                st.subheader(movie_tagline)
+                            if movie_description:
+                                st.write(movie_description)
+                            for link in movie_links:
+                                st.write(link)
+                            if idx < (len(full_sample) - 1):
+                                st.markdown('-----')
+                                
             else:
                 st.error(
                     'Sorry, but it looks like this user has no watchlist or it is set to private!')
