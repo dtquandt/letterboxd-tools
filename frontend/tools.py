@@ -34,6 +34,15 @@ def get_user_ratings(username):
         return None
 
 @st.cache(show_spinner=False)
+def get_user_director_ratings(username):
+    try:
+        user_id = lbxd.get_id_from_username(username)
+        ratings = lbxd.get_user_director_ratings(user_id)
+        return ratings
+    except:
+        return None
+
+@st.cache(show_spinner=False)
 def fetch_watchlist(username):
         try:
             user_watchlist = lbxd.get_member_watchlist(username)
