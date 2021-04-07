@@ -91,6 +91,39 @@ def get_user_ratings(member):
     return pd.DataFrame(all_ratings)
 
 
+def get_user_director_ratings(member):
+    cursor = 'start=0'
+    results = {'next': None}
+    all_director_ratings = []
+
+    while True:
+        response = api_request(
+            f'films/?perPage=100&member={member}&memberRelationship=Watched&sort=MemberRatingHighToLow&cursor={cursor}')
+        results = response.json()
+        for item in results['items']:
+            entry = {'member': member}
+            entry['film'] = item.get('name')
+
+            entry['director'] = item.get('directors')[1]
+
+            relationships = item.get('relationships')
+            if relationships:
+                relationship = relationships[0].get('relationship')
+                if relationship:
+                    entry['rating'] = relationship.get('rating')
+            all_director_ratings.append(entry)
+        if 'next' not in results:
+            break
+        else:
+            cursor = results['next']
+
+    directorratings = pd.DataFrame(all_director_ratings)
+    user_director_ratings = directorratings.groupby(['director']).agg(
+        {'rating': ['mean', 'count'], 'film': lambda x: list(x)})
+    user_director_ratings.columns = user_director_ratings.columns.get_level_values(1)
+
+    return directorratings
+
 def threaded_api_request(url_list, max_retries=15, max_threads=50, print_every=1000):
     
     from concurrent.futures import ThreadPoolExecutor, as_completed

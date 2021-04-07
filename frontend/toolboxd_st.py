@@ -25,6 +25,7 @@ TOOLS = OrderedDict(
         ("Random movie picker", (tools.random_movie_picker, 'https://i.imgur.com/jj7Ds9X.png')),
         ("Group watchlist picker", (tools.group_watchlist_picker, 'https://i.imgur.com/Q0JtBIk.jpg')),
         ("Recommendation system", (tools.recommendation_system, 'https://i.imgur.com/a4ja6ax.jpeg')),
+        ("Director Ranker", (tools.director_ranker, 'https://i.imgur.com/EzJ1iPb.jpg')),
         ("Film taste compatibility test", (tools.movie_compatibility_score, None)),
     ]
 )

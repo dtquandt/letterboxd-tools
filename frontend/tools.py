@@ -281,3 +281,40 @@ def recommendation_system():
                             col.markdown(poster_html, unsafe_allow_html=True)
                             col.write
                     st.write('')
+
+
+def director_ranker():
+
+    st.title("Sort watched directors by average rating and number of films watched")
+    st.write(
+        "In this tool you are able set the minimum amount of films rated for directors to show up in your “highest rated” stats.")
+
+    user_director_ratings = None
+    username = st.text_input('Please enter your Letterboxd username')
+
+    if username:
+        with st.spinner(
+                'Please wait while we grab your ratings. If you have a lot, it could take a while.'):
+            try:
+                user_director_ratings = get_user_director_ratings(username)
+                st.write(
+                    f"Looks like you've watched films from **{len(user_director_ratings.dropna(subset=['rating']))} Directors**.")
+            except:
+                st.error(
+                    "Sorry, we couldn't get the ratings for that user. Try again.")
+                user_director_ratings = None
+
+    if user_director_ratings is not None and len(user_director_ratings.dropna(subset=['rating'])) > 0:
+        count = st.slider('What is the minimum number of films for each director?', 2, 15)
+        if st.button('Generate Ranking'):
+
+            results = user_director_ratings[user_director_ratings['count'] >= count].copy()
+            results = results.nlargest(10, 'mean')
+            results['Average Rating'] = results['mean']
+            results['Number of Films'] = results['count']
+            results['List of Films'] = results['<lambda>']
+
+            st.write(
+                'Here are your top 10 directors, by average rating, given that you have seen more than {} of their films:'.append(count))
+            st.table(
+                results[['Average Rating', 'Number of Films', 'List of Films']])
