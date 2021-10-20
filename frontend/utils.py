@@ -58,7 +58,7 @@ def filter_movie_list(movie_list, year_range, runtime_range, popularity_range, r
             movie_list = movie_list[country_filter]
         if rating_range:
             movie_list = movie_list[movie_list['rating'].between(rating_range[0], rating_range[1])]
-        if include_genres:
+        if include_genres and 'genres' in movie_list.columns:
             movie_list['genre_names'] = movie_list['genres'].apply(lambda x: [y['name'] for y in x])
             valid_genres = movie_list['genre_names'].apply(lambda x: any(genre in include_genres for genre in x))
             movie_list = movie_list[valid_genres]
