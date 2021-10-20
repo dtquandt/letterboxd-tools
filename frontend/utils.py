@@ -10,10 +10,10 @@ import requests
 
 def get_filters(hide_watchlist_filter=True):
     
-    with st.beta_expander('Advanced filters'):
-            row1_col1, row1_col2 = st.beta_columns(2)
-            row2_col1, row2_col2 = st.beta_columns(2)
-            row3_col1, row3_col2 = st.beta_columns(2)
+    with st.expander('Advanced filters'):
+            row1_col1, row1_col2 = st.columns(2)
+            row2_col1, row2_col2 = st.columns(2)
+            row3_col1, row3_col2 = st.columns(2)
             with row1_col1:
                 year_range = st.slider('Release year', 1900, 2021, value=(1900, 2021), step=1, format='%i', key='year_sli')
             with row1_col2:
@@ -58,7 +58,7 @@ def filter_movie_list(movie_list, year_range, runtime_range, popularity_range, r
             movie_list = movie_list[country_filter]
         if rating_range:
             movie_list = movie_list[movie_list['rating'].between(rating_range[0], rating_range[1])]
-        if include_genres and 'genres' in movie_list.columns:
+        if include_genres:
             movie_list['genre_names'] = movie_list['genres'].apply(lambda x: [y['name'] for y in x])
             valid_genres = movie_list['genre_names'].apply(lambda x: any(genre in include_genres for genre in x))
             movie_list = movie_list[valid_genres]

@@ -73,7 +73,7 @@ def random_movie_picker():
             
         if user_watchlist is not None:
             if len(user_watchlist) > 0:
-                user_watchlist = user_watchlist.merge(film_data[['id', 'rating', 'runTime', 'popularity', 'countries', 'genres', 'tagline', 'description']], how='left', on='id')
+                user_watchlist = user_watchlist.merge(film_data[['id', 'rating', 'runTime', 'popularity', 'countries', 'tagline', 'description']], how='left', on='id')
                 st.success('Watchlist loaded successfully.')
                 year_range, runtime_range, popularity_range, rating_range, country_specification, include_genres = utils.get_filters()
                 movies_to_sample = st.slider('How many films do you want to pick?', 1, 10, 1, key='random_picker_sample_count')
@@ -262,16 +262,16 @@ def recommendation_system():
                     "Based on what you're into, we feel like you should give these movies a chance:")
 
                 for row in range(3):
-                    with st.beta_container():
-                        for col_idx, col in enumerate(st.beta_columns(3)):
+                    with st.container():
+                        for col_idx, col in enumerate(st.columns(3)):
                             i = (row+1)*3 + col_idx
                             movie = predictions.iloc[i]
                             movie_name = movie['name']
                             while '**' in movie_name:
                                 movie_name = movie_name.replace('**', r'\*\*')
                             col.write(f'**{movie_name}**')
-                    with st.beta_container():
-                        for col_idx, col in enumerate(st.beta_columns(3)):
+                    with st.container():
+                        for col_idx, col in enumerate(st.columns(3)):
                             i = (row+1)*3 + col_idx
                             movie = predictions.iloc[i]
                             movie_poster = movie['poster']['sizes'][-1]['url'] if len(
