@@ -127,6 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Toolboxd
 frontend/credentials.txt
 frontend/firebase-key.json
 *.pass
+*.ipynb
