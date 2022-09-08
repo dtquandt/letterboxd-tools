@@ -1,12 +1,4 @@
 import streamlit as st
-import streamlit_analytics
-import lbxd
-
-import pandas as pd
-import numpy as np
-import os
-
-import requests
 
 def get_filters(hide_watchlist_filter=True):
     

@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit_analytics
 import lbxd
 import utils
 
@@ -64,8 +63,7 @@ def random_movie_picker():
 
     st.write("## Can't pick a movie?\nRandomly select one from your watchlist!")
 
-    with streamlit_analytics.track(unsafe_password=analytics_password, firestore_key_file="firebase-key.json", firestore_collection_name="analytics"):
-        username = st.text_input('Letterboxd username', key='random_picker_username')
+    username = st.text_input('Letterboxd username', key='random_picker_username')
         
     if username:
         with st.spinner('Please wait a moment while we fetch your watchlist...'):
@@ -202,8 +200,7 @@ def recommendation_system():
     user_ratings = None
     user_watchlist = None
     
-    with streamlit_analytics.track(unsafe_password=analytics_password, firestore_key_file="firebase-key.json", firestore_collection_name="analytics"):
-        username = st.text_input('Please enter your Letterboxd username')
+    username = st.text_input('Please enter your Letterboxd username')
 
     if username:
         with st.spinner('Please wait while we grab your ratings and watchlist. If you have a lot, it could take a while.'):

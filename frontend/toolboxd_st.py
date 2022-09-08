@@ -1,6 +1,4 @@
 import streamlit as st
-import streamlit_analytics
-
 import pandas as pd
 import numpy as np
 
@@ -8,12 +6,6 @@ from collections import OrderedDict
 import os
 
 st.set_page_config(page_title='Toolboxd', page_icon='🎬')
-
-files = os.listdir()
-try:
-    analytics_password = [f.replace('.pass', '') for f in files if '.pass' in f][0]
-except:
-    analytics_password = 'password'
 
 import tools
 
@@ -30,9 +22,8 @@ TOOLS = OrderedDict(
 )
         
 def run():
-          
-    with streamlit_analytics.track(unsafe_password=analytics_password, firestore_key_file="firebase-key.json", firestore_collection_name="analytics"):      
-        tool_name = st.sidebar.selectbox("Choose a tool", list(TOOLS.keys()), 0)
+           
+    tool_name = st.sidebar.selectbox("Choose a tool", list(TOOLS.keys()), 0)
     tool = TOOLS[tool_name][0]
 
     if tool_name == "Introduction":
