@@ -2,4 +2,4 @@ pandas
 numpy
 uvicorn
 fastapi
-matrix-factorization
+git+https://github.com/Quang-Vinh/matrix-factorization
