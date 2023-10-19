@@ -9,7 +9,7 @@ import os
 
 import requests
 
-@st.cache(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def get_analytics_password():
     files = os.listdir()
     try:
@@ -20,11 +20,11 @@ def get_analytics_password():
 
 analytics_password = get_analytics_password()
 
-@st.cache(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def load_film_data():
     return pd.read_pickle('data/film_data.p')
 
-@st.cache(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def get_user_ratings(username):
     try:
         user_id = lbxd.get_id_from_username(username)
@@ -33,7 +33,7 @@ def get_user_ratings(username):
     except:
         return None
 
-@st.cache(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def fetch_watchlist(username):
         try:
             user_watchlist = lbxd.get_member_watchlist(username)
@@ -41,7 +41,7 @@ def fetch_watchlist(username):
         except:
             return None
             
-@st.cache(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def discover_api_base():
     api_base = 'http://localhost:8000'
     try:
@@ -120,7 +120,7 @@ def group_watchlist_picker():
     st.write("## Having trouble picking a film as a group?")
     st.write("Find common movies in your watchlists!")
 
-    @st.cache(show_spinner=False)
+    @st.cache_data(show_spinner=False)
     def fetch_watchlist(username):
         with st.spinner(f'Please wait a moment while we fetch the watchlist for {username}...'):
             try:
@@ -185,7 +185,7 @@ def movie_compatibility_score():
 
 def recommendation_system():
 
-    @st.cache(show_spinner=False)
+    @st.cache_data(show_spinner=False)
     def model_api_get(url):
         return requests.get(API_BASE+url).json()
 
